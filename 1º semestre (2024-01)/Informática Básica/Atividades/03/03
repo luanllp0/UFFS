@@ -1,0 +1,44 @@
+
+
+Atividade sobre Comandos Linux
+Este exercício tem como objetivo a interação com o Sistema Operacional e a prática de comandos no terminal do Linux.
+I Instruções 
+O trabalho deve conter, para cada questão, o seguinte conteúdo: 
+i. Os comandos utilizado para cada questão 
+ii. Um print da tela do terminal mostrando a execução do comando e, quando executado um comando de criação de diretórios ou arquivos, um print do explorer do Linux mostrando o diretório/arquivo criado.
+
+	Exemplo:
+
+
+
+II Entrega 
+A entrega da atividade será on-line através do SIGAA. O arquivo deve ser salvo em formato PDF e nomeado com a matrícula do estudante. Ex: 23111009876.pdf
+Data limite para entrega: 19/05/2024, 23h55m. 
+
+
+III Atividades
+
+Criar a seguinte estrutura de diretórios dentro do /home/seu_usuario
+./uffs
+./trabalho
+./uffs/textos
+Entrar na pasta uffs
+Criar um arquivo chamado “numeros.txt”, contendo os seguintes números: 10, 100, 50, 25, 1, 2
+Duplicar o arquivo numeros.txt para numeros1.txt e numeros2.txt
+Copiar os arquivos com extensão .txt para a pasta trabalho no home do usuário
+Exibir todos os arquivos da pasta atual com seus detalhes (permissões de acesso, etc)
+Mudar a permissão de acesso do arquivo numeros.txt para –rwxr-xr-x
+Mudar a permissão de acesso do arquivo numeros.txt para -rw-r--r--
+Crie a pasta uffsbackup no home do usuário e copie o conteúdo da pasta uffs, para dentro de /home/seu_usuario/uffsbackup
+Deletar os arquivos com extensão .txt
+Apagar a pasta textos que está dentro de uffs
+Entrar na pasta /home/seu_usuario/uffsbackup
+Renomear o arquivo numeros.txt para sequencia.txt
+Cria um novo diretório chamado aulas dentro de uffs
+Criar arquivos sem conteúdo dentro do diretório aulas: aula0, aula1 e aula2
+Copiar a listagem do comando ls –l para aula0, ps –aux para aula1 e top para aula2.
+Criar o arquivo aula3 e mesclar o conteúdo dos arquivos aula0, aula1 e aula2.
+Mostrar o conteúdo do arquivo aula3 e copiar este conteúdo para o arquivo aula4.
+Acrescentar ao conteúdo do arquivo aula4 a seguinte frase “Só sei que nada sei”.
+Listar o conteúdo do arquivo 4.
+

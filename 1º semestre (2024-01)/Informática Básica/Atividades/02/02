@@ -1,0 +1,98 @@
+
+
+Atividade sobre Sistemas de Numeração 
+Este exercício tem como objetivo a prática de operações e transformações entre diferentes sistemas de numeração (decimal, binário, octal e hexadecimal).
+
+I Instruções 
+O trabalho deve conter, para cada questão, o seguinte conteúdo: 
+i. O passo-a-passo das operações aritméticas. 
+ii. O passo-a-passo das operações de conversão.
+
+
+II Entrega 
+A entrega da atividade será on-line através do SIGAA. O estudante pode escolher uma das modalidades abaixo: 
+a. Criar as respostas em meio eletrônico (editor de texto) e enviar um arquivo PDF. 
+b. Resolver por escrito e escanear as folhas. 
+  Se o aluno optar por esta opção, cada folha deve indicar em local visível o nome e matrícula do aluno e claramente a qual questão cada resposta pertence. 
+
+Data limite para entrega: 29/04/2024, 23h55m. 
+
+
+III Atividades
+
+Questão 1 – Realize as seguintes conversões de base de numeração:
+a) (197)10  = (                       )2 
+b) (277)10  = (                             )8 
+c) (11011011)2  = (                             )10 
+d) (F2D)16  = (                             )10 
+e) (1010110101)2 = (                             )16
+f) (110011)2  = (                             )8
+g) (ABC)16  = (                             )2
+h) (11011011)2  = (                             )8 
+i) (1234)8  = (                             )2 
+j) (27)10 = (                             )16
+
+
+Questão 2 - Realize as operações aritméticas nas diferentes bases de numeração:
+
+Hexadecimal
+Octal
+Binário
+Binário
+AA5
+- A9
+
+
+654
++125
+
+
+1001001
+- 11011
+
+
+1001011
++ 11011
+
+
+Hexadecimal
+Octal
+Binário
+Binário
+FF12
+- B8
+
+
+6747
+-315
+
+
+1111001
++ 11011
+
+
+1111001
+- 11011
+
+
+Hexadecimal
+Octal
+
+
+
+
+AA5
++ A9
+
+
+654
+-125
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,19 @@
+
+Atividade sobre Git/Github
+Este exercício tem como objetivo a interação com o controle de versão Git e com o Github.
+I Instruções 
+O trabalho deve ser realizado em grupos de exatamente dois estudantes.
+II Entrega 
+A entrega da atividade será on-line realizando-se um pull request no repositório especificado abaixo para cada turma. 
+Data limite para entrega: 28/05/2024, 17h55m. 
+III Atividades
+
+
+Cada grupo deverá escolher uma personalidade que possua uma contribuição relevante para qualquer área da Ciência da Computação.
+Um dos componentes do grupo (Estudante A) deverá criar um fork do repositório abaixo:
+https://github.com/giancds/infbasica-uffs
+O outro componente do grupo (Estudante B) deverá clonar o repositório criado pelo Estudante A.
+Cada componente do grupo deve criar uma branch separada da branch main para trabalhar em uma parte do código. 
+Após a finalização do código dentro desta branch separada, os estudantes devem juntar as suas respectivas partes do código dentro da branch main do Estudante A. Isto pode ser feito através de um push para o repositório do Estudante A e, na sequência, uma operação de merge.
+O Estudante A envia um pull request para o repositório original, definido acima para cada turma
+

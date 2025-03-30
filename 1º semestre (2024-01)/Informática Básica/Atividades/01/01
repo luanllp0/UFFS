@@ -1,0 +1,44 @@
+
+Trabalho Máquinas de Turing 
+Este exercício tem como objetivo a prática da montagem e execução de Máquinas de Turing e suas funções de transição δ.
+I Instruções 
+O trabalho deve conter, para cada questão, o seguinte conteúdo:
+i. Lógica utilizada para resolver o problema.
+ii. Indicação do alfabeto utilizado para construir a Máquina.
+iii. Tabela de transição.
+iv. Representação gráfica da Máquina de Turing.
+v. Execuções solicitadas. 
+
+II Entrega 
+A entrega da atividade será on-line através do SIGAA. O estudante deve enviar um único arquivo ZIP contendo as suas implementações e demais itens solicitados.
+Data limite para entrega: 22/04/2024, 23h59m. 
+
+III Avaliação
+A avaliação se dará pela correção das respostas numa escala com intervalo = [0, 10]. 
+Em caso de plágio (incluindo utilização de ferramentas de geração de código), a entrega será desconsiderada e os estudantes envolvidos receberão nota 0. Procedimentos administrativos poderão ser iniciados após consulta à coordenação de curso. Os professores do CCR se reservam ao direito de solicitar que estudantes apresentem a solução produzida para o trabalho após a entrega. 
+
+
+
+IV Atividades
+
+01 –  Construa uma Máquina de Turing que recebe a codificação binária x de um número
+natural n e computa a codificação binária do dobro de n. Mostre a execução de M
+para n = 21 (binary = 10101), n = 8 (binary = 1000), n = 1 (binary = 1) e n = 0
+(binary = 0). Dica: para calcular o dobro de um número binário basta adicionar o
+dígito 0 no final do número.
+
+
+02 – Construa uma Máquina de Turing que recebe uma cadeia binária x e verifique se x é
+um palíndromo (isto é, x se lido da esquerda para direita é igual a ele mesmo na
+ordem inversa). Demonstre a execução de M para x = 101; x = 1001 e x = 010010.
+Dica: percorra a cadeia com um estado de leitura e ao chegar sobre o espaço em
+branco, retorne com um estado de verificação. Reescreva os dígitos lidos e verificados
+com símbolos para controlar o que já foi lido e verificado. 
+
+03 – Construa uma Máquina de Turing que recebe duas cadeias binárias x e y de igual
+número de bits, separadas por um símbolo ⊔ , e verifica se cada bit de x e y são
+iguais (operação XNOR) indicando V caso todos os bits forem iguais e F caso
+houverem bits diferentes. A máquina deve retornar um estado indicando V ou F.
+Mostre a execução de M para (x, y) = (0, 0), (x, y) = (101, 010) e (x, y) = (111,
+111). Dica: percorra a primeira cadeia com um estado de leitura e a segunda cadeia com um estado de verificação. Reescreva os dígitos lidos e verificados com símbolos para controlar o que já foi lido e verificado.
+
