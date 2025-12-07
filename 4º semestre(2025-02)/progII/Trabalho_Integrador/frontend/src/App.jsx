@@ -7,6 +7,9 @@ import CadastrarCliente from './components/CadastraClientes';
 import ListaCaminhoes from './components/ListaCaminhoes';
 import CadastrarCaminhao from './components/CadastraCaminhoes';
 
+import ListaServicos from './components/ListaServicos';
+import CadastrarServico from './components/CadastrarServico';
+
 function App() {
   return (
     <>
@@ -45,6 +48,17 @@ function App() {
             <ListaCaminhoes />
           </Grid>
         </Grid>
+
+        <Divider sx={{ my: 6 }} />
+
+        <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>3. Ordens de Serviço</Typography>
+        <Box sx={{ my: 4 }}>
+            <CadastrarServico /> 
+            <Box sx={{ mt: 4 }}>
+                <ListaServicos />
+            </Box>
+        </Box>
+
       </Container>
     </>
   );
