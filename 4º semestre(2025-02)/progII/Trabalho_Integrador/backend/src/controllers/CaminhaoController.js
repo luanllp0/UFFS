@@ -19,6 +19,17 @@ const CaminhaoController = {
             console.error(error);
             res.status(500).json({ error: 'Erro ao cadastrar caminhão' });
         }
+    },
+
+    async deletar(req, res) {
+        const { placa } = req.params;
+        try {
+            await CaminhaoService.deletar(placa);
+            res.status(204).send();
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Erro ao deletar caminhão' });
+        }
     }
 };
 

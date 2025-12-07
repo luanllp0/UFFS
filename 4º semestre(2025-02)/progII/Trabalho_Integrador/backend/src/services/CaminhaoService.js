@@ -12,6 +12,11 @@ const CaminhaoService = {
         const valores = [placa, modeloDescricao, idCliente];
         const resultado = await pool.query(query, valores);
         return resultado.rows[0];
+    },
+
+    async deletar(placa) {
+        const query = 'DELETE FROM Caminhao WHERE placa = $1';
+        await pool.query(query, [placa]);
     }
 };
 

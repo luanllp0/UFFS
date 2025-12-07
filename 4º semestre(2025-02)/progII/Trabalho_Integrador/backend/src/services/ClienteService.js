@@ -12,6 +12,11 @@ const ClienteService = {
         const valores = [nome, telefone, email];
         const resultado = await pool.query(query, valores);
         return resultado.rows[0];
+    },
+
+    async deletar(id) {
+        const query = 'DELETE FROM Cliente WHERE idcliente = $1';
+        await pool.query(query, [id]);
     }
 };
 

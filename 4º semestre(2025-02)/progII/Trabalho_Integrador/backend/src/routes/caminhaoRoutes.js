@@ -6,4 +6,6 @@ router.get('/', CaminhaoController.listar);
 
 router.post('/', CaminhaoController.criar);
 
+router.delete('/:placa', CaminhaoController.deletar);
+
 module.exports = router;

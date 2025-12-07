@@ -6,4 +6,6 @@ router.get('/', ClienteController.listar);
 
 router.post('/', ClienteController.criar);
 
+router.delete('/:id', ClienteController.deletar);
+
 module.exports = router;
