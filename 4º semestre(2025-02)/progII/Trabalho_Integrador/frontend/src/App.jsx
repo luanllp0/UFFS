@@ -1,70 +1,132 @@
-import React, { useContext } from 'react';
-import { AuthProvider, AuthContext } from './context/AuthContext';
-import { CssBaseline, Container, Box, Typography, Divider, Grid, Button, AppBar, Toolbar } from '@mui/material';
+import React, { useContext } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, AuthContext } from "./context/AuthContext";
+import { CssBaseline, AppBar, Toolbar, Typography, Box } from "@mui/material";
 
-import ListaClientes from './components/ListaClientes';
-import CadastrarCliente from './components/CadastraClientes';
-import ListaCaminhoes from './components/ListaCaminhoes';
-import CadastrarCaminhao from './components/CadastraCaminhoes';
-import ListaServicos from './components/ListaServicos';
-import CadastrarServico from './components/CadastrarServico';
-import LoginPage from './components/LoginPage';
+import LoginPage from "./components/LoginPage";
+import MenuLateral from "./components/MenuLateral";
 
-function ConteudoDoSistema() {
-    const { logout, user } = useContext(AuthContext);
+import PaginaClientes from "./pages/PaginaClientes";
+import PaginaCaminhoes from "./pages/PaginaCaminhoes";
+import PaginaServicos from "./pages/PaginaServicos";
+import PaginaDashboard from "./pages/PaginaDashboard";
 
-    return (
-        <>
-            <AppBar position="static">
-                <Toolbar>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        Sistema Rodofrio - Olá, {user?.nome}
-                    </Typography>
-                    <Button color="inherit" onClick={logout}>Sair</Button>
-                </Toolbar>
-            </AppBar>
+function RotaPrivada({ children }) {
+  const { signed, loading } = useContext(AuthContext);
 
-            <Container maxWidth="lg" sx={{ mb: 8 }}>
-                
-                <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>1. Gestão de Clientes</Typography>
-                <Grid container spacing={4}>
-                    <Grid item xs={12} md={4}><CadastrarCliente /></Grid>
-                    <Grid item xs={12} md={8}><ListaClientes /></Grid>
-                </Grid>
+  if (loading) return <div>Carregando...</div>;
 
-                <Divider sx={{ my: 6 }} />
-
-                <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>2. Gestão de Caminhões</Typography>
-                <Grid container spacing={4}>
-                    <Grid item xs={12} md={4}><CadastrarCaminhao /></Grid>
-                    <Grid item xs={12} md={8}><ListaCaminhoes /></Grid>
-                </Grid>
-
-                <Divider sx={{ my: 6 }} />
-
-                <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>3. Ordens de Serviço</Typography>
-                <Box sx={{ my: 4 }}>
-                    <CadastrarServico /> 
-                    <Box sx={{ mt: 4 }}>
-                        <ListaServicos />
-                    </Box>
-                </Box>
-
-            </Container>
-        </>
-    );
+  return signed ? children : <Navigate to="/login" />;
 }
 
-function Routes() {
-    const { signed } = useContext(AuthContext);
-    return signed ? <ConteudoDoSistema /> : <LoginPage />;
+function RotaAdmin({ children }) {
+  const { user, loading } = useContext(AuthContext);
+
+  if (loading) return <div>Carregando...</div>;
+
+  if (user?.tipo !== "Colaborador Interno" && user?.tipo !== "admin") {
+    return (
+      <div style={{ padding: 40, textAlign: "center" }}>
+        <Typography variant="h5" color="error">
+          ⛔ Acesso Negado
+        </Typography>
+        <Typography>
+          Você não tem permissão para acessar esta página.
+        </Typography>
+      </div>
+    );
+  }
+
+  return children;
+}
+
+function LayoutDoSistema({ children }) {
+  const { user } = useContext(AuthContext);
+  return (
+    <Box sx={{ display: "flex" }}>
+      <AppBar
+        position="fixed"
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
+        <Toolbar>
+          <Typography variant="h6" noWrap component="div">
+            Sistema Rodofrio - {user?.nome} ({user?.tipo})
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <MenuLateral>{children}</MenuLateral>
+    </Box>
+  );
+}
+
+function AppRoutes() {
+  const { signed } = useContext(AuthContext);
+
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={signed ? <Navigate to="/" /> : <LoginPage />}
+      />
+
+      <Route
+        path="/"
+        element={
+          <RotaPrivada>
+            <LayoutDoSistema>
+              <PaginaDashboard />
+            </LayoutDoSistema>
+          </RotaPrivada>
+        }
+      />
+
+      <Route
+        path="/clientes"
+        element={
+          <RotaPrivada>
+            <RotaAdmin>
+              <LayoutDoSistema>
+                <PaginaClientes />
+              </LayoutDoSistema>
+            </RotaAdmin>
+          </RotaPrivada>
+        }
+      />
+
+      <Route
+        path="/caminhoes"
+        element={
+          <RotaPrivada>
+            <RotaAdmin>
+              <LayoutDoSistema>
+                <PaginaCaminhoes />
+              </LayoutDoSistema>
+            </RotaAdmin>
+          </RotaPrivada>
+        }
+      />
+
+      <Route
+        path="/servicos"
+        element={
+          <RotaPrivada>
+            <LayoutDoSistema>
+              <PaginaServicos />
+            </LayoutDoSistema>
+          </RotaPrivada>
+        }
+      />
+    </Routes>
+  );
 }
 
 function App() {
   return (
     <AuthProvider>
       <CssBaseline />
-      <Routes />
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
     </AuthProvider>
   );
 }

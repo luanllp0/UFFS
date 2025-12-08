@@ -40,7 +40,7 @@ function ListaCaminhoes() {
       setCaminhoes(caminhoes.filter((caminhoes) => caminhoes.placa !== id));
     } catch (error) {
       alert(
-        "Erro ao excluir."
+        "Erro ao excluir. Verifique se há serviços vinculados ao caminhão.",
       );
     }
   }
