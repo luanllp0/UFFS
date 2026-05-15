@@ -15,6 +15,9 @@ struct proc *initproc;
 int nextpid = 1;
 struct spinlock pid_lock;
 
+static unsigned int lottery_seed = 123456789; // valor estático inicial da seed
+static int last_index_class[4] = {0, 0, 0, 0}; // próxima posição inicial de busca para cada classe
+
 extern void forkret(void);
 static void freeproc(struct proc *p);
 
@@ -426,6 +429,54 @@ kwait(uint64 addr)
   }
 }
 
+int
+random_lottery(void){   // Função p substituir rand()
+  lottery_seed = lottery_seed * 1103515245 + 12345; // Parâmetros de uso comum em LCGs
+  lottery_seed = lottery_seed ^ (unsigned int)r_time(); // Mistura bits da seed com bits do tempo atual. (xor)
+  return (lottery_seed / 65536) % 32768; // Parâmetros comuns 2¹⁶ e 2¹⁵ -> não retornar direto %12 para sortear apenas as classes que tem processos ativos
+}
+
+int
+draw_priority_class(void){
+  int has_class[4] = {0,0,0,0}; // Vetor que indica se tem processo dessa classe
+  int tickets[12]; // Vetor para representar a qtd de tickets
+  int total_tickets = 0;  // Variavel pra informar o valor max do sorteio
+  struct proc *p; // Ponteiro de processos
+
+  for(p = proc; p < &proc[NPROC]; p++) {  // Roda todos os processos da tabela de processos
+    acquire(&p->lock); // Locka o processo pra ninguem utilizar simultâneamente
+    if(p->state == RUNNABLE && p->priority_class >= 0 && p->priority_class <= 3) { // verifica se está pronto e se a classe de prioridade é valida
+      has_class[p->priority_class] = 1; //marca que tem processo na classe
+    }
+     release(&p->lock); // Libera o processo
+  }
+  if (has_class[0]){ // se tiver processos da classe 0, adciona 6 posições do vetor com 0 e incrementa o total de tickets
+    for (int i=0; i<6; i++){
+      tickets[total_tickets++] = 0;
+    }
+  }
+  if (has_class[1]){ // mesma coisa
+    for (int i=0; i<3; i++){
+      tickets[total_tickets++] = 1;
+    }
+  }  
+  if (has_class[2]){ // mesma coisa
+    for (int i=0; i<2; i++){
+      tickets[total_tickets++] = 2;
+    }
+  }
+  if (has_class[3]){ // mesma coisa
+    tickets[total_tickets++] = 3;
+  }
+
+  if(total_tickets == 0){ // se não tiver nenhum processo
+    return -1;
+  }
+
+  int draw_pos = random_lottery() % total_tickets; // sorteia baseado no total de tickets e devolve a posição no vetor
+  return(tickets[draw_pos]); // retorna a classe sorteada
+}
+
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
 // Scheduler never returns.  It loops, doing:
@@ -450,22 +501,35 @@ scheduler(void)
     intr_off();
 
     int found = 0;
-    for(p = proc; p < &proc[NPROC]; p++) {
-      acquire(&p->lock);
-      if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
+    int selected_class = draw_priority_class(); // sorteia a classe
 
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-        found = 1;
+    if (selected_class >= 0){ // verifica se o sorteio deu certo
+      for (int i = 0; i < NPROC; i++){ // passa por todos os processos da tabela
+        int index = (last_index_class[selected_class]+i) % NPROC; // começa a procurar a partir da ultima posição da classe
+        p = &proc[index]; // ponteiro aponta pro processo na posição do index
+
+        acquire(&p->lock); // locka o processo
+
+        if(p->state == RUNNABLE && p->priority_class == selected_class){ // se estiver pronto e for da classe sorteada
+          // Switch to chosen process.  It is the process's job
+          // to release its lock and then reacquire it
+          // before jumping back to us.
+          p->state = RUNNING; // muda o estado para executando
+          c->proc = p; // processo para cpu 
+          swtch(&c->context, &p->context); // troca de contexto
+
+          // Process is done running for now.
+          // It should have changed its p->state before coming back.
+          c->proc = 0; // tira o processo da cpu
+          found = 1; // marca que encontrou pelo menos um processo
+
+          last_index_class[selected_class] = (index+1) % NPROC; // atualiza o valor do ultimo indice 
+
+          release(&p->lock); // solta o lock caso tiver rodado o processo
+          break; // break para refazer o sorteio e não procurar na mesma classe
+        }
+        release(&p->lock); // solta o lock caso não tenha rodado o processo
       }
-      release(&p->lock);
     }
     if(found == 0) {
       // nothing to run; stop running on this core until an interrupt.
