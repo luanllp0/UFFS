@@ -4,6 +4,7 @@ struct stat;
 
 // system calls
 int fork(void);
+int fork_priority(int); // declaração nova função p/ usuários
 int exit(int) __attribute__((noreturn));
 int wait(int*);
 int pipe(int*);

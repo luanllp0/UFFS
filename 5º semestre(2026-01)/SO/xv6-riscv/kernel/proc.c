@@ -124,6 +124,7 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
+  p->priority_class = 3;  // Padrão de menor prioridade
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
@@ -256,18 +257,24 @@ growproc(int n)
 
 // Create a new process, copying the parent.
 // Sets up child kernel stack to return as if from fork() system call.
+
 int
-kfork(void)
+kfork_priority(int priority_class)
 {
   int i, pid;
   struct proc *np;
   struct proc *p = myproc();
 
+  if(priority_class < 0 || priority_class > 3){   // verifica se a classe de prioridade é valida
+    return -1;
+  }
   // Allocate process.
   if((np = allocproc()) == 0){
     return -1;
   }
 
+  np->priority_class = priority_class;  // adciona a classe de prioridade ao novo processo
+  
   // Copy user memory from parent to child.
   if(uvmcopy(p->pagetable, np->pagetable, p->sz) < 0){
     freeproc(np);
@@ -305,6 +312,11 @@ kfork(void)
   return pid;
 }
 
+int
+kfork(void) // quando for usado o fork sem parâmetro de prioridade, a prioridade será automaticamente 3
+{
+  return kfork_priority(3);
+}
 // Pass p's abandoned children to init.
 // Caller must hold wait_lock.
 void

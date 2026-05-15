@@ -29,6 +29,16 @@ sys_fork(void)
 }
 
 uint64
+sys_fork_priority(void)   // chamada de sistema para o fork de prioridade
+{
+  int priority_class;
+
+  argint(0, &priority_class);
+
+  return kfork_priority(priority_class);
+}
+
+uint64
 sys_wait(void)
 {
   uint64 p;
