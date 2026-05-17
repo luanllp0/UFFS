@@ -1,7 +1,7 @@
 #include "kernel/types.h"
 #include "user/user.h"
 
-#define STEPS 5 // qtd de passos
+#define STEPS 3 // qtd de passos
 #define WORK_PER_STEP 100000000 // incrementos de cada passo
 
 void

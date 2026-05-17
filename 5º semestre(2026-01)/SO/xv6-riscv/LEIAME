@@ -1,0 +1,34 @@
+Trabalho 1 SO - Luan Lucas de Lima Peloso 20240005644
+
+Instruções para executar os testes do Trabalho 1:
+
+Para exibir o funcionamento do escalonador, foram implementados 3 testes:
+
+1- lotterytest:
+propósito: exibir o funcionamento do escalonamento por loteria: 
+Cria 4 processos (1 pra cada classe), e coloca eles para "trabalhar"
+trabalhar (do_work): faz um definido número de incrementos a cada passo para um determinado número de passos (para imprimir o progresso). Exibe a ordem que os processos iniciam e finalizam, deixando mais explicito o sorteio do escalonador.
+Caso queira, pode alterar os valores definidos no inicio do código de lotterytest, para aumentar ou diminuir o tamanho e quantidades de passos.
+    Execução:
+-Entrar na pasta do xv6-riscv (terminal), executar:
+make clean
+-Opcionalmente, para facilitar a visualização da saída dos testes, executar com apenas uma CPU:
+make qemu CPUS=1
+-Senão:
+make qemu
+-executar:
+lotterytest
+
+2- lotterytest2:
+propósito: Além de exibir o escalonamento por loteria das classes, exibir também o funcionamento do round robin interno das classes:
+Cria X processos para cada classe, e coloca eles para "trabalhar"
+trabalhar (work): faz um definido número de incrementos a cada passo para um determinado número de passos (para imprimir o progresso). Exibe a ordem que os processos iniciam e finalizam, deixando mais explicito o sorteio do escalonador e o round robin interno onde os processos dentro das classes alternam em ordem circular para execução.
+Caso queira, pode alterar os valores definidos no inicio do código de lotterytest, para aumentar ou diminuir o tamanho e quantidades de passos, a quantidade de classes e a quantidade de processos por classe (lembrando que foram passadas 4 classes, caso seja definido um valor maior que 4 ou menor que 0, a execução não irá funcionar normalmente)
+    -Execução:
+lotterytest2
+
+3- pinvalid:
+propósito: Exibir a verificação de valor de classe na criação de processos:
+Cria 2 processos fora do intervalo definido de classes (0 a 4) e exibe se o retorno foi -1 (erro).
+-executar:
+pinvalid
