@@ -265,54 +265,54 @@ int
 kfork_priority(int priority_class)
 {
   int i, pid;
-  struct proc *np;
-  struct proc *p = myproc();
+  struct proc *np; // ponteiro pro processo filho (novo)
+  struct proc *p = myproc(); // ponteiro para o processo pai (atual)
 
   if(priority_class < 0 || priority_class > 3){   // verifica se a classe de prioridade é valida
     return -1;
   }
   // Allocate process.
-  if((np = allocproc()) == 0){
+  if((np = allocproc()) == 0){ // tenta alocar um processo 
     return -1;
   }
 
   np->priority_class = priority_class;  // adciona a classe de prioridade ao novo processo
   
-  // Copy user memory from parent to child.
-  if(uvmcopy(p->pagetable, np->pagetable, p->sz) < 0){
-    freeproc(np);
-    release(&np->lock);
+  // Copy user memory from parent to child. - copia a memória de usuário do pai pro filho 
+  if(uvmcopy(p->pagetable, np->pagetable, p->sz) < 0){ // se a cópia falhar
+    freeproc(np); // libera os recursos do filho
+    release(&np->lock); // libera o lock (conseguido em allocproc)
     return -1;
   }
-  np->sz = p->sz;
+  np->sz = p->sz; // copia o tamanho de memória de pai pra filho
 
   // copy saved user registers.
-  *(np->trapframe) = *(p->trapframe);
+  *(np->trapframe) = *(p->trapframe); // copia os registadores de pai pra filho (filho começa com o contexto do pai)
 
   // Cause fork to return 0 in the child.
-  np->trapframe->a0 = 0;
+  np->trapframe->a0 = 0; // Ajusta o valor de retorno do fork no processo filho.
 
-  // increment reference counts on open file descriptors.
+  // increment reference counts on open file descriptors. - Copia os arquivos abertos do pai para o filho.
   for(i = 0; i < NOFILE; i++)
     if(p->ofile[i])
       np->ofile[i] = filedup(p->ofile[i]);
-  np->cwd = idup(p->cwd);
+  np->cwd = idup(p->cwd); // copia o diretório atual do pai para o filho.
 
-  safestrcpy(np->name, p->name, sizeof(p->name));
+  safestrcpy(np->name, p->name, sizeof(p->name)); // Copia o nome do processo pai para o processo filho.
 
-  pid = np->pid;
+  pid = np->pid; // Guarda o PID do filho para retornar ao processo pai no final.
 
-  release(&np->lock);
+  release(&np->lock); // Libera o lock do novo processo.
 
   acquire(&wait_lock);
-  np->parent = p;
+  np->parent = p; // define o pai do novo processo
   release(&wait_lock);
 
   acquire(&np->lock);
-  np->state = RUNNABLE;
+  np->state = RUNNABLE; // define novo processo como pronto
   release(&np->lock);
 
-  return pid;
+  return pid; // retorna o PID do filho para o processo pai
 }
 
 int
@@ -432,15 +432,15 @@ kwait(uint64 addr)
 int
 random_lottery(void){   // Função p substituir rand()
   lottery_seed = lottery_seed * 1103515245 + 12345; // Parâmetros de uso comum em LCGs
-  lottery_seed = lottery_seed ^ (unsigned int)r_time(); // Mistura bits da seed com bits do tempo atual. (xor)
+  lottery_seed = lottery_seed ^ (unsigned int)r_time(); // Mistura bits da seed com bits do tempo do cpu/simulador. (xor)
   return (lottery_seed / 65536) % 32768; // Parâmetros comuns 2¹⁶ e 2¹⁵ -> não retornar direto %12 para sortear apenas as classes que tem processos ativos
 }
 
 int
 draw_priority_class(void){
-  int has_class[4] = {0,0,0,0}; // Vetor que indica se tem processo dessa classe
-  int tickets[12]; // Vetor para representar a qtd de tickets
-  int total_tickets = 0;  // Variavel pra informar o valor max do sorteio
+  int has_class[4] = {0,0,0,0}; // Vetor que indica se cada classe tem algum processo
+  int tickets[12]; // Vetor para representar a qtd de tickets total
+  int total_tickets = 0;  // Variavel pra informar o valor max do sorteio (total de tickets)
   struct proc *p; // Ponteiro de processos
 
   for(p = proc; p < &proc[NPROC]; p++) {  // Roda todos os processos da tabela de processos
@@ -487,25 +487,25 @@ draw_priority_class(void){
 void
 scheduler(void)
 {
-  struct proc *p;
-  struct cpu *c = mycpu();
+  struct proc *p; // ponteiro p percorrer/acessar processos da tabela de processos
+  struct cpu *c = mycpu(); // estrutura da cpu atual
 
-  c->proc = 0;
-  for(;;){
+  c->proc = 0; // inicialmente a cpu não está executando nenhum processo
+  for(;;){ // loop infinito
     // The most recent process to run may have had interrupts
     // turned off; enable them to avoid a deadlock if all
     // processes are waiting. Then turn them back off
     // to avoid a possible race between an interrupt
     // and wfi.
-    intr_on();
+    intr_on(); // liga e desliga interrupções
     intr_off();
 
-    int found = 0;
+    int found = 0; // indica se foi encontrado processo para executar
     int selected_class = draw_priority_class(); // sorteia a classe
 
     if (selected_class >= 0){ // verifica se o sorteio deu certo
-      for (int i = 0; i < NPROC; i++){ // passa por todos os processos da tabela
-        int index = (last_index_class[selected_class]+i) % NPROC; // começa a procurar a partir da ultima posição da classe
+      for (int i = 0; i < NPROC; i++){ // itera de 0 até NPROC(64)
+        int index = (last_index_class[selected_class]+i) % NPROC; // indice começa no proximo processo da classe (round robin)
         p = &proc[index]; // ponteiro aponta pro processo na posição do index
 
         acquire(&p->lock); // locka o processo
@@ -523,7 +523,7 @@ scheduler(void)
           c->proc = 0; // tira o processo da cpu
           found = 1; // marca que encontrou pelo menos um processo
 
-          last_index_class[selected_class] = (index+1) % NPROC; // atualiza o valor do ultimo indice 
+          last_index_class[selected_class] = (index+1) % NPROC; // atualiza o valor do proximo processo da classe 
 
           release(&p->lock); // solta o lock caso tiver rodado o processo
           break; // break para refazer o sorteio e não procurar na mesma classe

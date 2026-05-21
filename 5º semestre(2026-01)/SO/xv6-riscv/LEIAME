@@ -30,5 +30,5 @@ lotterytest2
 3- pinvalid:
 propósito: Exibir a verificação de valor de classe na criação de processos:
 Cria 2 processos fora do intervalo definido de classes (0 a 4) e exibe se o retorno foi -1 (erro).
--executar:
+    -Execução:
 pinvalid
