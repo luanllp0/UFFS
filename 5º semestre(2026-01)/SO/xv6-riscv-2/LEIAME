@@ -1,0 +1,34 @@
+Trabalho 2 SO - Luan Lucas de Lima Peloso 20240005644
+
+Instruções para executar os testes do Trabalho 2:
+
+Para exibir o funcionamento do escalonador, foram implementados 3 testes:
+
+1- stridetest:
+propósito: exibir o funcionamento do escalonamento por passos largos (stride scheduling):
+Cria 3 processos (A, B e C) com quantidades diferentes de bilhetes (100, 50 e 250, respectivamente, conforme o exemplo da especificação), e coloca eles para "trabalhar"
+trabalhar (do_work): faz um definido número de incrementos a cada passo para um determinado número de passos (para imprimir o progresso). Exibe a ordem que os processos iniciam e finalizam, deixando mais explicito o determinismo do escalonador, onde o processo com mais bilhetes (menor passo) termina o trabalho primeiro.
+Caso queira, pode alterar os valores definidos no inicio do código de stridetest, para aumentar ou diminuir o tamanho e quantidades de passos.
+Execução:
+-Entrar na pasta do xv6-riscv-2 (terminal), executar:
+make clean
+-Opcionalmente, para facilitar a visualização da saída dos testes, executar com apenas uma CPU:
+make qemu CPUS=1
+-Senão:
+make qemu
+-executar:
+stridetest
+
+2- stridesame:
+propósito: Além de exibir o escalonamento, exibir também o critério de desempate e a justiça (fairness) do algoritmo:
+Cria 3 processos com a exata mesma quantidade de bilhetes (100), e coloca eles para "trabalhar"
+trabalhar (work): faz um definido número de incrementos a cada passo para um determinado número de passos (para imprimir o progresso). Exibe a ordem que os processos iniciam e finalizam, deixando mais explicito que processos com passos iguais dividem a CPU de forma igualitária (terminando juntos) e que o escalonador utiliza o maior PID para desempatar a escolha na hora da execução.
+Caso queira, pode alterar os valores definidos no inicio do código de stridesame, para aumentar ou diminuir o tamanho e quantidades de passos, a quantidade total de processos e a quantidade padrão de bilhetes.
+-Execução:
+stridesame
+
+3- ticketinvalid:
+propósito: Exibir a verificação de valores na solicitação de bilhetes durante a criação de processos:
+Tenta criar 3 processos com quantidades fora do intervalo permitido (0, -50 e 15000) e exibe se o retorno foi -1 (erro), evitando falhas no kernel como a divisão por zero.
+-Execução:
+ticketinvalid
