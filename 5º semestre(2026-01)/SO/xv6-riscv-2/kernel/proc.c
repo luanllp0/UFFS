@@ -458,7 +458,7 @@ scheduler(void)
     int min_pass = 2147483647; // maior valor de int(2³¹ - 1), para comparar e encontrar o menor
     int max_pid = -1; // valor negativo (inválido) para comparar e encontrar o maior
 
-    // Variáveis para rastrear o empate (debug)
+    // // Variáveis para rastrear o empate (debug)
     // int empate_ocorreu = 0;
     // int perdedor_pid = -1;
 
@@ -469,21 +469,21 @@ scheduler(void)
         // Verificação: se tem a menor passada ou se empatou na passada E tem o maior pid
         if(selected_p == 0 || p->pass_value < min_pass || (p->pass_value == min_pass && p->pid > max_pid)) {
 
-          // (debug)
-          // if(selected_p != 0 && p->pass_value == min_pass) { // se 
+          // // (debug)
+          // if(selected_p != 0 && p->pass_value == min_pass) { // se empatou
           //    empate_ocorreu = 1;
           //    perdedor_pid = max_pid; // O max_pid antigo perdeu para o p->pid novo
           // }
 
           selected_p = p;          // Elege este processo como o novo vencedor temporário
-          min_pass = p->pass_value; // Atualiza a barra da menor passada
+          min_pass = p->pass_value; // Atualiza o valor da menor passada
           max_pid = p->pid;         // Atualiza o PID para futuros desempates
         }
       }
       release(&p->lock); 
     }
 
-    // (debug)
+    // // (debug)
     // // pid > 2 para ignorar os pids do sistema
     // if(empate_ocorreu && selected_p != 0 && selected_p->pid > 2) {
     //     printf("Empate na passada %d: PID %d venceu o PID %d\n", min_pass, selected_p->pid, perdedor_pid);
