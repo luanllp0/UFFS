@@ -44,7 +44,10 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-primary">Agendar</a>
+                                    <a href="#" class="btn btn-sm btn-primary mb-1">Agendar</a>
+                                    
+                                    <a href="/editar-horario/{{ h.id }}/" class="btn btn-sm btn-warning mb-1">Editar</a>
+                                    <a href="/deletar-horario/{{ h.id }}/" class="btn btn-sm btn-danger mb-1" onclick="return confirm('Tem certeza que deseja excluir este horário?');">Excluir</a>
                                 </td>
                             </tr>
                         {% endfor %}
