@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>PUMA</title>
-</head>
-<body>
-    <h1>Portal Unificado de Monitoria e Apoio Acadêmico</h1>
-    <p>Projeto PUMA iniciado com Django.</p>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="jumbotron text-center mt-5">
+    <h1 class="display-4">Bem-vindo ao PUMA!</h1>
+    <p class="lead">Portal Unificado de Monitoria e Apoio Acadêmico da UFFS.</p>
+    <hr class="my-4">
+    <p>Agende horários de atendimento com professores e monitores de forma simples e rápida.</p>
+    <a class="btn btn-primary btn-lg" href="#" role="button">Ver Horários Disponíveis</a>
+</div>
+{% endblock %}
