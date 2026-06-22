@@ -23,7 +23,7 @@ stridetest
 propósito: Além de exibir o escalonamento, exibir também o critério de desempate e a justiça (fairness) do algoritmo:
 Cria 3 processos com a exata mesma quantidade de bilhetes (100), e coloca eles para "trabalhar"
 trabalhar (work): faz um definido número de incrementos a cada passo para um determinado número de passos (para imprimir o progresso). Exibe a ordem que os processos iniciam e finalizam, deixando mais explicito que processos com passos iguais dividem a CPU de forma igualitária (terminando juntos) e que o escalonador utiliza o maior PID para desempatar a escolha na hora da execução.
-Caso queira, pode alterar os valores definidos no inicio do código de stridesame, para aumentar ou diminuir o tamanho e quantidades de passos, a quantidade total de processos e a quantidade padrão de bilhetes.
+Caso queira, pode alterar os valores definidos no inicio do código de stridesame, para aumentar ou diminuir o tamanho e quantidades de passos, a quantidade total de processos e a quantidade padrão de bilhetes. Também é recomendado descomentar as partes marcadas como (debug) em proc.c para verificar os desempates
 -Execução:
 stridesame
 

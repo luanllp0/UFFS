@@ -458,9 +458,9 @@ scheduler(void)
     int min_pass = 2147483647; // maior valor de int(2³¹ - 1), para comparar e encontrar o menor
     int max_pid = -1; // valor negativo (inválido) para comparar e encontrar o maior
 
-    // // Variáveis para rastrear o empate (debug)
-    // int empate_ocorreu = 0;
-    // int perdedor_pid = -1;
+    // Variáveis para rastrear o empate (debug)
+    int empate_ocorreu = 0;
+    int perdedor_pid = -1;
 
     for(p = proc; p < &proc[NPROC]; p++) { // percorre todos os processos da tabela
       acquire(&p->lock); // locka o processo
@@ -469,11 +469,11 @@ scheduler(void)
         // Verificação: se tem a menor passada ou se empatou na passada E tem o maior pid
         if(selected_p == 0 || p->pass_value < min_pass || (p->pass_value == min_pass && p->pid > max_pid)) {
 
-          // // (debug)
-          // if(selected_p != 0 && p->pass_value == min_pass) { // se empatou
-          //    empate_ocorreu = 1;
-          //    perdedor_pid = max_pid; // O max_pid antigo perdeu para o p->pid novo
-          // }
+          // (debug)
+          if(selected_p != 0 && p->pass_value == min_pass) { // se empatou
+             empate_ocorreu = 1;
+             perdedor_pid = max_pid; // O max_pid antigo perdeu para o p->pid novo
+          }
 
           selected_p = p;          // Elege este processo como o novo vencedor temporário
           min_pass = p->pass_value; // Atualiza o valor da menor passada
@@ -483,11 +483,11 @@ scheduler(void)
       release(&p->lock); 
     }
 
-    // // (debug)
-    // // pid > 2 para ignorar os pids do sistema
-    // if(empate_ocorreu && selected_p != 0 && selected_p->pid > 2) {
-    //     printf("Empate na passada %d: PID %d venceu o PID %d\n", min_pass, selected_p->pid, perdedor_pid);
-    // }
+    // (debug)
+    // pid > 2 para ignorar os pids do sistema
+    if(empate_ocorreu && selected_p != 0 && selected_p->pid > 2) {
+        printf("Empate na passada %d: PID %d venceu o PID %d\n", min_pass, selected_p->pid, perdedor_pid);
+    }
 
     if(selected_p != 0) { // se o processo selecionado é valido
       acquire(&selected_p->lock); // locka o processo
