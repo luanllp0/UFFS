@@ -8,7 +8,7 @@ class HorarioDisponivelForm(forms.ModelForm):
         model = HorarioDisponivel
         fields = ['turma', 'data', 'hora_inicio', 'hora_fim', 'local', 'status', 'aluno_agendado']
         widgets = {
-            'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'data': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
             'hora_inicio': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'hora_fim': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'local': forms.TextInput(attrs={'class': 'form-control'}),

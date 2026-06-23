@@ -7,8 +7,8 @@
     <hr class="my-3">
     
     {% if is_monitor_ou_prof %}
-        <a class="btn btn-primary btn-lg m-1" href="/novo-horario/" role="button">Agendar Dia Único</a>
-        <a class="btn btn-success btn-lg m-1" href="/novo-padrao/" role="button">Gerar Padrão Semanal</a>
+        <a class="btn btn-primary btn-lg m-1" href="/novo-horario/" role="button">Disponibilizar Horário</a>
+        <a class="btn btn-success btn-lg m-1" href="/novo-padrao/" role="button">Disponibilizar Padrão de Horários</a>
     {% endif %}
 </div>
 
@@ -34,11 +34,11 @@
                 <h4 class="mb-0">Agenda de Monitorias</h4>
                 <div class="d-flex align-items-center">
                     <span class="badge badge-success mr-2">Instantâneo</span>
-                    <span class="badge badge-warning text-dark mr-2">Solicitar / Pendente</span>
+                    <span class="badge badge-warning text-dark mr-2">Disponível p/ Solicitar</span>
+                    <span class="badge text-white mr-2" style="background-color: #fd7e14;">Pendente</span>
                     <span class="badge badge-danger">Ocupado</span>
                 </div>
-            </div>
-            <div class="card-body p-4">
+            </div> <div class="card-body p-4">
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <select id="filtro-turma" class="form-control font-weight-bold shadow-sm">
@@ -72,6 +72,22 @@
         center: 'title',
         right: 'dayGridMonth,timeGridWeek,timeGridDay'
       },
+
+      buttonText: {
+        today: 'Hoje',
+        month: 'Mês',
+        week: 'Semana',
+        day: 'Dia'
+      },
+
+      dateClick: function(info) {
+        // Apenas professores e monitores podem disponibilizar horários
+        if (isMonitorOuProf) {
+            // Redireciona para a tela de novo horário passando a data clicada na URL
+            window.location.href = '/novo-horario/?data=' + info.dateStr;
+        }
+      },
+
       events: '/api/horarios/',
       
       eventClick: function(info) {
@@ -80,10 +96,8 @@
         var temAluno = info.event.extendedProps.tem_aluno;
 
         if (isMonitorOuProf) {
-            // Professor/Monitor vai para a edição verificar quem é o aluno e mudar para Vermelho
             window.location.href = '/editar-horario/' + eventId + '/';
         } else if (isAluno) {
-            // Regra do Aluno
             if (eventStatus === 'VERDE') {
                 if (!temAluno) {
                     if (confirm('Deseja agendar este horário instantaneamente? Ele será reservado para você na hora.')) {
@@ -95,9 +109,9 @@
                     if (confirm('Deseja solicitar agendamento? O monitor precisará confirmar o seu pedido.')) {
                         window.location.href = '/solicitar-agendamento/' + eventId + '/';
                     }
-                } else {
-                    alert('Este horário já possui uma solicitação pendente de outro aluno.');
                 }
+            } else if (eventStatus === 'LARANJA') {
+                alert('Este horário já possui uma solicitação pendente de outro aluno.');
             } else if (eventStatus === 'VERMELHO') {
                 alert('Este horário já está ocupado por outro aluno.');
             }

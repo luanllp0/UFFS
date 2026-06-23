@@ -1,28 +1,37 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from django.http import JsonResponse
+from django.db.models import Q # <--- NOVA IMPORTAÇÃO PARA O FILTRO
+
 from .models import HorarioDisponivel, Turma
 from .forms import HorarioDisponivelForm, CadastroForm, PadraoSemanalForm
-from django.http import JsonResponse
 
-# Importações para a API de feriados
 import urllib.request
 import json
 from datetime import datetime
 
 def home(request):
     data = {}
-    data['turmas'] = Turma.objects.all() # Envia as turmas para o filtro HTML
     
-    # Verifica os papéis do utilizador logado
     if request.user.is_authenticated:
         data['is_monitor_ou_prof'] = request.user.groups.filter(name__in=['PROFESSOR', 'MONITOR']).exists()
         data['is_aluno'] = request.user.groups.filter(name='ALUNO').exists()
+        
+        # FILTRO NOVO: Apenas turmas vinculadas ao usuário logado
+        if request.user.is_superuser:
+            data['turmas'] = Turma.objects.all() # Administrador vê todas
+        else:
+            data['turmas'] = Turma.objects.filter(
+                Q(professores=request.user) | 
+                Q(monitores=request.user) | 
+                Q(alunos=request.user)
+            ).distinct()
     else:
         data['is_monitor_ou_prof'] = False
         data['is_aluno'] = False
+        data['turmas'] = Turma.objects.none() # Visitantes não veem turmas no dropdown
         
-    # CORREÇÃO: Definição da variável ano_atual antes de entrar no bloco try
     ano_atual = datetime.now().year
     try:
         url = f'https://brasilapi.com.br/api/feriados/v1/{ano_atual}'
@@ -47,7 +56,7 @@ def ajudar_cadastro(request):
         form = CadastroForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user) # Faz login automático logo após registar
+            login(request, user)
             return redirect('/')
     else:
         form = CadastroForm()
@@ -63,7 +72,31 @@ def cadastrar_horario(request):
             horario.save()
             return redirect('/')
     else:
-        form = HorarioDisponivelForm()
+        # NOVO: Verifica se veio uma data na URL (ex: ?data=2026-06-23)
+        data_via_url = request.GET.get('data')
+        if data_via_url:
+            # Passa a data como valor inicial para o formulário
+            form = HorarioDisponivelForm(initial={'data': data_via_url})
+        else:
+            form = HorarioDisponivelForm()
+        
+    if not request.user.is_superuser:
+        form.fields['turma'].queryset = Turma.objects.filter(
+            Q(professores=request.user) | 
+            Q(monitores=request.user) | 
+            Q(alunos=request.user)
+        ).distinct()
+        
+    return render(request, 'cadastrar_horario.html', {'form': form})
+        
+    # FILTRO NOVO: Limita as turmas no formulário de criação
+    if not request.user.is_superuser:
+        form.fields['turma'].queryset = Turma.objects.filter(
+            Q(professores=request.user) | 
+            Q(monitores=request.user) | 
+            Q(alunos=request.user)
+        ).distinct()
+        
     return render(request, 'cadastrar_horario.html', {'form': form})
 
 @login_required
@@ -76,6 +109,15 @@ def editar_horario(request, id):
             return redirect('/')
     else:
         form = HorarioDisponivelForm(instance=horario)
+        
+    # FILTRO NOVO: Limita as turmas no formulário de edição
+    if not request.user.is_superuser:
+        form.fields['turma'].queryset = Turma.objects.filter(
+            Q(professores=request.user) | 
+            Q(monitores=request.user) | 
+            Q(alunos=request.user)
+        ).distinct()
+        
     return render(request, 'editar_horario.html', {'form': form, 'horario': horario})
 
 @login_required
@@ -91,24 +133,37 @@ def cadastrar_padrao(request):
         if form.is_valid():
             padrao = form.save(commit=False)
             padrao.responsavel = request.user
-            padrao.save() # É aqui que aquele gatilho mágico que criámos antes vai ser disparado!
+            padrao.save()
             return redirect('/')
     else:
         form = PadraoSemanalForm()
-    
+        
+    # FILTRO NOVO: Limita as turmas no formulário de padrão semanal
+    if not request.user.is_superuser:
+        form.fields['turma'].queryset = Turma.objects.filter(
+            Q(professores=request.user) | 
+            Q(monitores=request.user) | 
+            Q(alunos=request.user)
+        ).distinct()
+        
     return render(request, 'cadastrar_padrao.html', {'form': form})
 
 def api_horarios(request):
     turma_id = request.GET.get('turma')
+    filtros = {}
     
-    # ALTERAÇÃO: Se for Professor ou Monitor, filtra para exibir APENAS os horários dele
-    if request.user.is_authenticated and request.user.groups.filter(name__in=['PROFESSOR', 'MONITOR']).exists():
-        filtros = {'responsavel': request.user}
-    else:
-        # Alunos e visitantes continuam vendo todos os horários disponíveis para poderem agendar
-        filtros = {}
+    if request.user.is_authenticated:
+        if request.user.groups.filter(name__in=['PROFESSOR', 'MONITOR']).exists():
+            filtros['responsavel'] = request.user
+            
+        if not turma_id and not request.user.is_superuser:
+            turmas_vinculadas = Turma.objects.filter(
+                Q(professores=request.user) | 
+                Q(monitores=request.user) | 
+                Q(alunos=request.user)
+            ).distinct()
+            filtros['turma__in'] = turmas_vinculadas
 
-    # Se houver um filtro de turma selecionado no dropdown, combina os filtros
     if turma_id:
         filtros['turma_id'] = turma_id
         
@@ -116,11 +171,13 @@ def api_horarios(request):
     
     eventos = []
     for h in horarios:
-        cor = '#28a745'
+        cor = '#28a745' # Verde
         if h.status == 'AMARELO':
-            cor = '#ffc107'
+            cor = '#ffc107' # Amarelo (Disponível para solicitar)
+        elif h.status == 'LARANJA':
+            cor = '#fd7e14' # Laranja (Já foi solicitado, pendente de aprovação)
         elif h.status == 'VERMELHO':
-            cor = '#dc3545'
+            cor = '#dc3545' # Vermelho (Ocupado)
 
         start = f"{h.data.strftime('%Y-%m-%d')}T{h.hora_inicio.strftime('%H:%M:%S')}"
         end = f"{h.data.strftime('%Y-%m-%d')}T{h.hora_fim.strftime('%H:%M:%S')}"
@@ -137,32 +194,25 @@ def api_horarios(request):
         
     return JsonResponse(eventos, safe=False)
 
-# Permite ao professor/monitor confirmar a solicitação pendente
-@login_required
-def confirmar_agendamento(request, id):
-    horario = HorarioDisponivel.objects.get(id=id)
-    # Garante que apenas o criador do horário pode confirmar e se o status for Amarelo
-    if horario.responsavel == request.user and horario.status == 'AMARELO':
-        horario.status = 'VERMELHO' # Transforma o horário em Ocupado/Confirmado
-        horario.save()
-    return redirect('/')
-
 @login_required
 def solicitar_agendamento(request, id):
     horario = HorarioDisponivel.objects.get(id=id)
-    
-    # Apenas Alunos podem interagir
     if request.user.groups.filter(name='ALUNO').exists():
-        # Regra 1: Agendamento Instantâneo (Verde para Vermelho)
         if horario.status == 'VERDE' and not horario.aluno_agendado:
-            horario.status = 'VERMELHO' 
+            horario.status = 'VERMELHO' # Agendamento direto
             horario.aluno_agendado = request.user
             horario.save()
-            
-        # Regra 2: Solicitar Agendamento (Amarelo, continua Amarelo mas regista o aluno)
         elif horario.status == 'AMARELO' and not horario.aluno_agendado:
-            horario.status = 'AMARELO'
+            horario.status = 'LARANJA' # Muda para Laranja para bloquear outros alunos
             horario.aluno_agendado = request.user
             horario.save()
-            
+    return redirect('/')
+
+@login_required
+def confirmar_agendamento(request, id):
+    horario = HorarioDisponivel.objects.get(id=id)
+    # Agora o professor confirma a partir do status Laranja
+    if horario.responsavel == request.user and horario.status == 'LARANJA':
+        horario.status = 'VERMELHO'
+        horario.save()
     return redirect('/')

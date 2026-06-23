@@ -31,10 +31,15 @@ class Turma(models.Model):
     professor = models.ForeignKey(
         User,
         on_delete=models.PROTECT,
-        related_name='turmas_ministradas'
+        related_name='turmas_ministradas',
+        help_text="Professor principal/responsável pela criação da turma"
     )
     nome = models.CharField(max_length=50)
     semestre = models.CharField(max_length=20)
+
+    professores = models.ManyToManyField(User, related_name='turmas_prof', blank=True, verbose_name="Professores Vinculados")
+    monitores = models.ManyToManyField(User, related_name='turmas_monitor', blank=True, verbose_name="Monitores Vinculados")
+    alunos = models.ManyToManyField(User, related_name='turmas_aluno', blank=True, verbose_name="Alunos Vinculados")
 
     def __str__(self):
         return f'{self.disciplina.codigo} - {self.nome} - {self.semestre}'
@@ -61,11 +66,12 @@ class Monitoria(models.Model):
 
 
 class HorarioDisponivel(models.Model):
-    STATUS_HORARIO = [
-        ('VERDE', 'Livre para agendamento direto'),
-        ('AMARELO', 'Livre com confirmação'),
-        ('VERMELHO', 'Ocupado'),
-    ]
+    STATUS_HORARIO = (
+        ('VERDE', 'Disponível (Instantâneo)'),
+        ('AMARELO', 'Disponível (Requer Aprovação)'),
+        ('LARANJA', 'Solicitação Pendente'),
+        ('VERMELHO', 'Ocupado / Confirmado'),
+    )
 
     responsavel = models.ForeignKey(
         User,
@@ -80,7 +86,7 @@ class HorarioDisponivel(models.Model):
     data = models.DateField()
     hora_inicio = models.TimeField()
     hora_fim = models.TimeField()
-    status = models.CharField(max_length=20, choices=STATUS_HORARIO)
+    status = models.CharField(max_length=20, choices=STATUS_HORARIO, default='VERDE')
     local = models.CharField(max_length=100, blank=True, null=True)
     observacao = models.TextField(blank=True, null=True)
     aluno_agendado = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='monitorias_agendadas', verbose_name="Aluno Agendado")
