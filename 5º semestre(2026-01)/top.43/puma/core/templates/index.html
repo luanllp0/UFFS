@@ -11,6 +11,21 @@
     {% endif %}
 </div>
 
+{% if feriados %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-warning shadow-sm border-warning">
+            <h5 class="alert-heading text-dark mb-2"><strong>Aviso de Feriados (Sem Monitoria!):</strong></h5>
+            <ul class="mb-0 text-dark">
+                {% for feriado in feriados %}
+                    <li><strong>{{ feriado.data_formatada }}</strong> - {{ feriado.name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="row">
     <div class="col-md-12">
         <h2 class="mb-4">Horários de Atendimento Disponíveis</h2>
