@@ -1,32 +1,56 @@
-from django.forms import ModelForm
 from django import forms
-from .models import HorarioDisponivel, Agendamento
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.forms import UserCreationForm
+from .models import HorarioDisponivel, PadraoSemanal
 
-class HorarioDisponivelForm(ModelForm):
+class HorarioDisponivelForm(forms.ModelForm):
     class Meta:
         model = HorarioDisponivel
-        # Definimos quais campos o professor/monitor vai preencher ao criar um horário
-        fields = ['turma', 'data', 'hora_inicio', 'hora_fim', 'status', 'local', 'observacao']
-        
-        # O dicionário 'widgets' aplica as classes do Bootstrap (form-control)
-        # diretamente nos inputs do HTML, garantindo a responsividade exigida.
+        fields = ['turma', 'data', 'hora_inicio', 'hora_fim', 'local', 'status', 'aluno_agendado']
         widgets = {
-            'turma': forms.Select(attrs={'class': 'form-control'}),
-            'data': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'hora_inicio': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
-            'hora_fim': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'hora_inicio': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'hora_fim': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'local': forms.TextInput(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
-            'local': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Sala 203 ou Link do Meet'}),
-            'observacao': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'turma': forms.Select(attrs={'class': 'form-control'}),
+            'aluno_agendado': forms.Select(attrs={'class': 'form-control'}),
         }
 
-class AgendamentoForm(ModelForm):
+class PadraoSemanalForm(forms.ModelForm):
     class Meta:
-        model = Agendamento
-        # O aluno só precisa preencher o assunto e a descrição ao solicitar a reserva
-        fields = ['assunto', 'descricao']
-        
+        model = PadraoSemanal
+        fields = ['turma', 'dia_da_semana', 'hora_inicio', 'hora_fim', 'local', 'data_inicio', 'data_fim']
         widgets = {
-            'assunto': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Qual a sua dúvida principal?'}),
-            'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Descreva detalhadamente o que você precisa de ajuda...'}),
+            'turma': forms.Select(attrs={'class': 'form-control'}),
+            'dia_da_semana': forms.Select(attrs={'class': 'form-control'}),
+            'hora_inicio': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'hora_fim': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'local': forms.TextInput(attrs={'class': 'form-control'}),
+            'data_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'data_fim': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
+
+class CadastroForm(UserCreationForm):
+    TIPO_USUARIO = (
+        ('ALUNO', 'Aluno'),
+        ('MONITOR', 'Monitor'),
+        ('PROFESSOR', 'Professor'),
+    )
+    tipo = forms.ChoiceField(choices=TIPO_USUARIO, label="Tipo de Utilizador", widget=forms.Select(attrs={'class': 'form-control'}))
+    email = forms.EmailField(required=True, label="E-mail", widget=forms.EmailInput(attrs={'class': 'form-control'}))
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = UserCreationForm.Meta.fields + ('email',)
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        if commit:
+            user.save()
+            # Vincula o utilizador ao grupo correspondente (cria o grupo se não existir)
+            tipo = self.cleaned_data['tipo']
+            grupo, created = Group.objects.get_or_create(name=tipo)
+            user.groups.add(grupo)
+        return user

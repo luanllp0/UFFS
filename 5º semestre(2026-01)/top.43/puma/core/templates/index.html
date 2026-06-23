@@ -6,8 +6,9 @@
     <p class="lead">Portal Unificado de Monitoria e Apoio Acadêmico da UFFS.</p>
     <hr class="my-3">
     
-    {% if user.is_authenticated %}
-        <a class="btn btn-primary btn-lg" href="/novo-horario/" role="button">Disponibilizar Novo Horário</a>
+    {% if is_monitor_ou_prof %}
+        <a class="btn btn-primary btn-lg m-1" href="/novo-horario/" role="button">Agendar Dia Único</a>
+        <a class="btn btn-success btn-lg m-1" href="/novo-padrao/" role="button">Gerar Padrão Semanal</a>
     {% endif %}
 </div>
 
@@ -26,59 +27,94 @@
 </div>
 {% endif %}
 
-<div class="row">
+<div class="row mt-4 mb-5">
     <div class="col-md-12">
-        <h2 class="mb-4">Horários de Atendimento Disponíveis</h2>
-        
-        {% if horarios %}
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>Responsável</th>
-                            <th>Turma</th>
-                            <th>Data</th>
-                            <th>Horário</th>
-                            <th>Local</th>
-                            <th>Status</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for h in horarios %}
-                            <tr>
-                                <td>{{ h.responsavel.username }}</td>
-                                <td>{{ h.turma.nome }}</td>
-                                <td>{{ h.data|date:"d/m/Y" }}</td>
-                                <td>{{ h.hora_inicio|time:"H:i" }} às {{ h.hora_fim|time:"H:i" }}</td>
-                                <td>{{ h.local|default:"Não informado" }}</td>
-                                <td>
-                                    {% if h.status == 'VERDE' %}
-                                        <span class="badge badge-success">Direto</span>
-                                    {% elif h.status == 'AMARELO' %}
-                                        <span class="badge badge-warning">Requer Confirmação</span>
-                                    {% else %}
-                                        <span class="badge badge-danger">Ocupado</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-primary mb-1">Agendar</a>
-                                    
-                                    {% if user.is_authenticated %}
-                                        <a href="/editar-horario/{{ h.id }}/" class="btn btn-sm btn-warning mb-1">Editar</a>
-                                        <a href="/deletar-horario/{{ h.id }}/" class="btn btn-sm btn-danger mb-1" onclick="return confirm('Tem certeza que deseja excluir este horário?');">Excluir</a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Agenda de Monitorias</h4>
+                <div class="d-flex align-items-center">
+                    <span class="badge badge-success mr-2">Instantâneo</span>
+                    <span class="badge badge-warning text-dark mr-2">Solicitar / Pendente</span>
+                    <span class="badge badge-danger">Ocupado</span>
+                </div>
             </div>
-        {% else %}
-            <div class="alert alert-info" role="alert">
-                Nenhum horário de monitoria ou atendimento foi cadastrado ainda.
+            <div class="card-body p-4">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <select id="filtro-turma" class="form-control font-weight-bold shadow-sm">
+                            <option value="">Todas as Turmas (Visão Geral)</option>
+                            {% for t in turmas %}
+                                <option value="{{ t.id }}">{{ t.disciplina.nome }} - {{ t.codigo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div id='calendar'></div>
             </div>
-        {% endif %}
+        </div>
     </div>
 </div>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var isMonitorOuProf = "{{ is_monitor_ou_prof }}" === "True";
+    var isAluno = "{{ is_aluno }}" === "True";
+    
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'pt-br',
+      height: 650,
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      events: '/api/horarios/',
+      
+      eventClick: function(info) {
+        var eventId = info.event.id;
+        var eventStatus = info.event.extendedProps.status;
+        var temAluno = info.event.extendedProps.tem_aluno;
+
+        if (isMonitorOuProf) {
+            // Professor/Monitor vai para a edição verificar quem é o aluno e mudar para Vermelho
+            window.location.href = '/editar-horario/' + eventId + '/';
+        } else if (isAluno) {
+            // Regra do Aluno
+            if (eventStatus === 'VERDE') {
+                if (!temAluno) {
+                    if (confirm('Deseja agendar este horário instantaneamente? Ele será reservado para você na hora.')) {
+                        window.location.href = '/solicitar-agendamento/' + eventId + '/';
+                    }
+                }
+            } else if (eventStatus === 'AMARELO') {
+                if (!temAluno) {
+                    if (confirm('Deseja solicitar agendamento? O monitor precisará confirmar o seu pedido.')) {
+                        window.location.href = '/solicitar-agendamento/' + eventId + '/';
+                    }
+                } else {
+                    alert('Este horário já possui uma solicitação pendente de outro aluno.');
+                }
+            } else if (eventStatus === 'VERMELHO') {
+                alert('Este horário já está ocupado por outro aluno.');
+            }
+        } else {
+            alert('Crie uma conta ou faça login para interagir com a agenda.');
+        }
+      }
+    });
+    
+    calendar.render();
+
+    // Lógica do Filtro de Turma
+    document.getElementById('filtro-turma').addEventListener('change', function() {
+        var turmaId = this.value;
+        calendar.removeAllEventSources();
+        calendar.addEventSource('/api/horarios/?turma=' + turmaId);
+    });
+  });
+</script>
 {% endblock %}

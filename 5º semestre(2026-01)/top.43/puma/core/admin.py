@@ -7,6 +7,7 @@ from .models import (
     HorarioDisponivel,
     Agendamento,
     Notificacao,
+    PadraoSemanal,
 )
 
 
@@ -17,3 +18,4 @@ admin.site.register(Monitoria)
 admin.site.register(HorarioDisponivel)
 admin.site.register(Agendamento)
 admin.site.register(Notificacao)
+admin.site.register(PadraoSemanal)
