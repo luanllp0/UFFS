@@ -5,7 +5,10 @@
     <h1 class="display-4">Portal PUMA</h1>
     <p class="lead">Portal Unificado de Monitoria e Apoio Acadêmico da UFFS.</p>
     <hr class="my-3">
-    <a class="btn btn-primary btn-lg" href="/novo-horario/" role="button">Disponibilizar Novo Horário</a>
+    
+    {% if user.is_authenticated %}
+        <a class="btn btn-primary btn-lg" href="/novo-horario/" role="button">Disponibilizar Novo Horário</a>
+    {% endif %}
 </div>
 
 <div class="row">
@@ -46,8 +49,10 @@
                                 <td>
                                     <a href="#" class="btn btn-sm btn-primary mb-1">Agendar</a>
                                     
-                                    <a href="/editar-horario/{{ h.id }}/" class="btn btn-sm btn-warning mb-1">Editar</a>
-                                    <a href="/deletar-horario/{{ h.id }}/" class="btn btn-sm btn-danger mb-1" onclick="return confirm('Tem certeza que deseja excluir este horário?');">Excluir</a>
+                                    {% if user.is_authenticated %}
+                                        <a href="/editar-horario/{{ h.id }}/" class="btn btn-sm btn-warning mb-1">Editar</a>
+                                        <a href="/deletar-horario/{{ h.id }}/" class="btn btn-sm btn-danger mb-1" onclick="return confirm('Tem certeza que deseja excluir este horário?');">Excluir</a>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% endfor %}
