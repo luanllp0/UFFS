@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h4>Acesso ao PUMA</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger p-2">
+                            Nome de utilizador ou palavra-passe incorretos. Tente novamente.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="form-group">
+                        <label for="id_username">Nome de Utilizador</label>
+                        {{ form.username }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_password">Palavra-passe</label>
+                        {{ form.password }}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block mt-4">Entrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('id_username').classList.add('form-control');
+    document.getElementById('id_password').classList.add('form-control');
+</script>
+{% endblock %}

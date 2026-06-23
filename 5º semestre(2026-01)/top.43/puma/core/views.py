@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required 
 from .models import HorarioDisponivel
 from .forms import HorarioDisponivelForm
 
@@ -7,6 +8,7 @@ def home(request):
     data['horarios'] = HorarioDisponivel.objects.all()
     return render(request, 'index.html', data)
 
+@login_required # Protege a rota
 def cadastrar_horario(request):
     if request.method == 'POST':
         form = HorarioDisponivelForm(request.POST)
@@ -21,6 +23,7 @@ def cadastrar_horario(request):
         
     return render(request, 'cadastrar_horario.html', {'form': form})
 
+@login_required # Protege a rota
 def editar_horario(request, id):
     # Busca o horário específico no banco de dados
     horario = HorarioDisponivel.objects.get(id=id)
@@ -37,6 +40,7 @@ def editar_horario(request, id):
         
     return render(request, 'editar_horario.html', {'form': form, 'horario': horario})
 
+@login_required # Protege a rota
 def deletar_horario(request, id):
     # Busca o horário e o apaga diretamente
     horario = HorarioDisponivel.objects.get(id=id)
