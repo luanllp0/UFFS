@@ -89,16 +89,6 @@ def cadastrar_horario(request):
         
     return render(request, 'cadastrar_horario.html', {'form': form})
         
-    # FILTRO NOVO: Limita as turmas no formulário de criação
-    if not request.user.is_superuser:
-        form.fields['turma'].queryset = Turma.objects.filter(
-            Q(professores=request.user) | 
-            Q(monitores=request.user) | 
-            Q(alunos=request.user)
-        ).distinct()
-        
-    return render(request, 'cadastrar_horario.html', {'form': form})
-
 @login_required
 def editar_horario(request, id):
     horario = HorarioDisponivel.objects.get(id=id)
