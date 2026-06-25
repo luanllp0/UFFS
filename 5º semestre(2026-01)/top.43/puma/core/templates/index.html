@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="jumbotron text-center p-4">
+    <h1 class="display-4">Portal PUMA</h1>
+    <p class="lead">Portal Unificado de Monitoria e Apoio Acadêmico da UFFS.</p>
+    <hr class="my-3">
+    
+    {% if is_monitor_ou_prof %}
+        <a class="btn btn-primary btn-lg m-1" href="/novo-horario/" role="button">Disponibilizar Horário</a>
+        <a class="btn btn-success btn-lg m-1" href="/novo-padrao/" role="button">Disponibilizar Padrão de Horários</a>
+    {% endif %}
+</div>
+
+{% if feriados %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-warning shadow-sm border-warning">
+            <h5 class="alert-heading text-dark mb-2"><strong>Aviso de Feriados (Sem Monitoria!):</strong></h5>
+            <ul class="mb-0 text-dark">
+                {% for feriado in feriados %}
+                    <li><strong>{{ feriado.data_formatada }}</strong> - {{ feriado.name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mt-4 mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Agenda de Monitorias</h4>
+                <div class="d-flex align-items-center">
+                    <span class="badge badge-success mr-2">Instantâneo</span>
+                    <span class="badge badge-warning text-dark mr-2">Disponível p/ Solicitar</span>
+                    <span class="badge text-white mr-2" style="background-color: #fd7e14;">Pendente</span>
+                    <span class="badge badge-danger">Ocupado</span>
+                </div>
+            </div> <div class="card-body p-4">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <select id="filtro-turma" class="form-control font-weight-bold shadow-sm">
+                            <option value="">Todas as Turmas (Visão Geral)</option>
+                            {% for t in turmas %}
+                                <option value="{{ t.id }}">{{ t.disciplina.nome }} - {{ t.codigo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div id='calendar'></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var isMonitorOuProf = "{{ is_monitor_ou_prof }}" === "True";
+    var isAluno = "{{ is_aluno }}" === "True";
+    
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'pt-br',
+      height: 650,
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+
+      buttonText: {
+        today: 'Hoje',
+        month: 'Mês',
+        week: 'Semana',
+        day: 'Dia'
+      },
+
+      dateClick: function(info) {
+        // Apenas professores e monitores podem disponibilizar horários
+        if (isMonitorOuProf) {
+            // Redireciona para a tela de novo horário passando a data clicada na URL
+            window.location.href = '/novo-horario/?data=' + info.dateStr;
+        }
+      },
+
+      events: '/api/horarios/',
+      
+      eventClick: function(info) {
+        var eventId = info.event.id;
+        var eventStatus = info.event.extendedProps.status;
+        var temAluno = info.event.extendedProps.tem_aluno;
+
+        if (isMonitorOuProf) {
+            window.location.href = '/editar-horario/' + eventId + '/';
+        } else if (isAluno) {
+            if (eventStatus === 'VERDE') {
+                if (!temAluno) {
+                    if (confirm('Deseja agendar este horário instantaneamente? Ele será reservado para você na hora.')) {
+                        window.location.href = '/solicitar-agendamento/' + eventId + '/';
+                    }
+                }
+            } else if (eventStatus === 'AMARELO') {
+                if (!temAluno) {
+                    if (confirm('Deseja solicitar agendamento? O monitor precisará confirmar o seu pedido.')) {
+                        window.location.href = '/solicitar-agendamento/' + eventId + '/';
+                    }
+                }
+            } else if (eventStatus === 'LARANJA') {
+                alert('Este horário já possui uma solicitação pendente de outro aluno.');
+            } else if (eventStatus === 'VERMELHO') {
+                alert('Este horário já está ocupado por outro aluno.');
+            }
+        } else {
+            alert('Crie uma conta ou faça login para interagir com a agenda.');
+        }
+      }
+    });
+    
+    calendar.render();
+
+    // Lógica do Filtro de Turma
+    document.getElementById('filtro-turma').addEventListener('change', function() {
+        var turmaId = this.value;
+        calendar.removeAllEventSources();
+        calendar.addEventSource('/api/horarios/?turma=' + turmaId);
+    });
+  });
+</script>
+{% endblock %}
