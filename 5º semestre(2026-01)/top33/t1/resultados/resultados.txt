@@ -1,0 +1,5 @@
+Quantidade de imagens usadas no treino: 15000
+Épocas: 500
+Taxa de aprendizado: 0.5
+Acurácia no treino: 0.9746
+Acurácia no teste: 0.9532

@@ -1,0 +1,38 @@
+TRABALHO T1 - REDE NEURAL PARA CLASSIFICAÇÃO DO MNIST
+Luan Lucas de Lima Peloso - 20240005644
+
+As dependências utilizadas no projeto estão listadas no arquivo requirements.txt.
+OBS: Durante os testes, a versão mais recente da biblioteca kagglehub apresentou erro de importação relacionado ao pacote kagglesdk, versão utilizada: kagglehub==0.3.12
+
+O treinamento foi feito com uma parte do conjunto de treino, em vez de usar todas as 60.000 imagens. Isso foi feito para reduzir o custo computacional e deixar a execução mais leve.
+
+Durante o desenvolvimento foram testadas diferentes combinações de parâmetros, como quantidade de imagens de treino, número de épocas e taxa de aprendizado.
+Parâmetros utilizados na versão final:
+
+Quantidade de imagens usadas no treino: 15000
+Épocas: 500
+Taxa de aprendizado: 0.5
+Seed: 4937
+
+A avaliação final foi feita no notebook analise.ipynb.
+
+Com os parâmetros finais, foram obtidos os seguintes resultados:
+
+Acurácia no treino: 0.9746
+Acurácia no teste: 0.9532
+
+Como executar:
+
+Primeiro, instale as dependências:
+
+pip install -r requirements.txt
+
+Depois, execute o arquivo principal:
+
+python3 main.py
+
+Após a execução, os arquivos de resultado serão salvos na pasta resultados.
+
+Para visualizar os gráficos e análises, abra e execute o notebook:
+
+analise.ipynb

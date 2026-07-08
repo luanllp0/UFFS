@@ -1,0 +1,5 @@
+numpy
+matplotlib
+pandas
+kagglehub==0.3.12
+ipykernel

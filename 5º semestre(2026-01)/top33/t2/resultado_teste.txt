@@ -1,0 +1,2 @@
+loss:4.7760
+perplexidade:118.6286
