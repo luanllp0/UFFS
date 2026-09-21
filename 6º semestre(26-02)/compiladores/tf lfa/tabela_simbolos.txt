@@ -1,0 +1,14 @@
+linha=1 | identificador=q9 | rotulo=ei
+linha=1 | identificador=q9 | rotulo=ei
+linha=1 | identificador=q9 | rotulo=ou
+linha=1 | identificador=q9 | rotulo=ai
+linha=2 | identificador=q9 | rotulo=ou
+linha=3 | identificador=q9 | rotulo=ai
+linha=4 | identificador=q9 | rotulo=ia
+linha=5 | identificador=Erro | rotulo=uo
+linha=6 | identificador=Erro | rotulo=x
+linha=7 | identificador=q9 | rotulo=ia
+linha=8 | identificador=Erro | rotulo=bx
+linha=9 | identificador=Erro | rotulo=zz
+linha=10 | identificador=Erro | rotulo=ab
+linha=11 | identificador=Erro | rotulo=qq
